@@ -6,7 +6,9 @@ struct record
 {
     char *last_name;
     char *first_name;
+    char *license_no;
     char *license_type;
+    char *issue_date;
 };
 
 
