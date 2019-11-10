@@ -1,3 +1,7 @@
+/* Eric Minseo Park
+ * 1001018
+ * epark03@uoguelph.ca
+ */
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,6 +24,9 @@ struct array
     int hash_size;
 };
 
+int hash1(char *string, int hash_size);
+int hash2(char *string, int hash_size);
+int hash3(char *string, int hash_size);
 int char2int( unsigned char c );
 int str2int( char *s, int max );
 struct array *read_records();
