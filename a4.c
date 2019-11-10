@@ -24,26 +24,19 @@ int char2int(unsigned char c) {
     return 26;
 }
 
+/*E.g. Harrison*/
+/*This hash function is based on the Multiplicative String Hash function introduced in ZyBooks 5.7: Common Hash Functions:
+ * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7 */
 int hash1(char *s, int max) {
-    char *c;
+    int index;
     unsigned long new;
-    unsigned long hashMultiplier = 33;
     unsigned long initialValue = 5381;
-    unsigned long hashValue = 5405931;
-    unsigned long hashValue2 = 4324321;
-    unsigned long hashValue3 = 12341;
     new = initialValue;
 
-    for (c = s; (*c); c++) {
-        new = new ^ char2int(*c);
-        new = new ^ hashMultiplier;
-        new = new * hashMultiplier;
-        new = new % max;
+    while ((index = *s++)) {
+        new = ((new << 5) + new) + index;
     }
-
-    if (new == (max - 1)) {
-        new - 1;
-    }
+    new = new % max;
 
     return (int) new;
 }
@@ -63,42 +56,32 @@ int backUp(char *s, int max) {
     return (int) new % max;
 }
 
+/*E.G. CD01-123432*/
 int hash2(char *s, int max) {
-    char *c;
+    int index;
     unsigned long new;
-    unsigned long hashMultiplier = 33;
     unsigned long initialValue = 5381;
     new = initialValue;
 
-    for (c = s; (*c); c++) {
-        new = new * hashMultiplier;
-        new = new + char2int(*c);
-        new = new % max;
+    while ((index = *s++)) {
+        new = ((new << 5) + new) + index;
     }
-
-    if (new == (max - 1)) {
-        new - 1;
-    }
+    new = new % max;
 
     return (int) new;
 }
 
+/*E.g. 03/01/1000*/
 int hash3(char *s, int max) {
-    char *c;
+    int index;
     unsigned long new;
-    unsigned long hashMultiplier = 33;
     unsigned long initialValue = 5381;
     new = initialValue;
 
-    for (c = s; (*c); c++) {
-        new = new * hashMultiplier;
-        new = new + char2int(*c);
-        new = new % max;
+    while ((index = *s++)) {
+        new = ((new << 5) + new) + index;
     }
-
-    if (new == (max - 1)) {
-        new - 1;
-    }
+    new = new % max;
 
     return (int) new;
 }
