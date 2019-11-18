@@ -31,10 +31,12 @@ int char2int(unsigned char c) {
 
 /*E.g. Harrison*/
 /*This hash function is based on the Multiplicative String Hash function introduced in ZyBooks 5.7: Common Hash Functions:
- * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7 */
+ * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7
+ * Also follows the structure of the york provided example:
+ * http://www.cse.yorku.ca/~oz/hash.html */
 int hash1(char *string, int hash_size) {
     int index;
-    unsigned long new;
+    unsigned long new, temp;
     unsigned long initialValue = 5381;
     new = initialValue;
 
@@ -42,7 +44,6 @@ int hash1(char *string, int hash_size) {
         new = ((new << 5) + new) + index;
     }
     new ^= index + 3;
-
     new = new % hash_size;
 
     return (int) new;
@@ -63,9 +64,34 @@ int backUp(char *s, int max) {
     return (int) new % max;
 }
 
-/*E.G. CD01-123432*/
+int str2int( char *s, int max )
+{
+    char *c;
+    unsigned long number, column, new;
+
+    column = 1;
+    number = 0;
+    for (c=s;(*c);c++)
+    {
+        number += char2int(*c) * column;
+        column *= 27;
+    }
+
+    new = 0;
+    while (number)
+    {
+        new = ( number + (new % max) ) % max;
+        number = number / max;
+    }
+
+    return (int)new;
+}
+
+/*E.G. CD-123432*/
 /*This hash function is based on the Multiplicative String Hash function introduced in ZyBooks 5.7: Common Hash Functions:
- * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7 */
+ * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7
+ * Also follows the structure of the york provided example of djb2:
+ * http://www.cse.yorku.ca/~oz/hash.html */
 int hash2(char *string, int hash_size) {
     int index;
     unsigned long new, temp;
@@ -79,16 +105,44 @@ int hash2(char *string, int hash_size) {
         new += new >> 11;
         new ^= new << 25;
         new += new << 3;
+        
     }
-
+    new ^= index + 25;
     new = new % hash_size;
 
     return (int) new;
 }
 
+int newHash(char *string, int hash_size) {
+    int index;
+    unsigned long new, temp;
+    unsigned long initialValue = 2166136261;
+    unsigned long multiplierValue = 16777619;
+    new = initialValue;
+    while ((index = *string++)) {
+        new *= multiplierValue;
+        new ^= *string++;
+    }
+    new = new % hash_size;
+
+    return (int) new;
+}
+
+/*Based on sbdm algorithm referenced by york university algorithm site:
+ * http://www.cse.yorku.ca/~oz/hash.html*/
+int newerHash(char *string, int hash_size) {
+    int index;
+    unsigned long new, temp;
+    new = 2654435769L;
+    new = new * *string >> 32;
+    return (int) new;
+}
+
 /*E.g. 03/01/1000*/
 /*This hash function is based on the Multiplicative String Hash function introduced in ZyBooks 5.7: Common Hash Functions:
- * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7 */
+ * https://learn.zybooks.com/zybook/UOGUELPHCIS2520KremerFall2019/chapter/5/section/7
+ * Also follows the structure of the york provided example:
+ * http://www.cse.yorku.ca/~oz/hash.html */
 int hash3(char *string, int hash_size) {
     int index;
     unsigned long new, temp;
@@ -98,6 +152,8 @@ int hash3(char *string, int hash_size) {
     while ((index = *string++)) {
         new = ((new << 5) + new) + index;
     }
+    new += new >> 16;
+    new ^= index << 19;
 
     new = new % hash_size;
 
@@ -116,7 +172,7 @@ struct array *read_records() {
     arrptr = malloc(sizeof(struct array));
     arrptr->nelements = 0;
 
-    fp = fopen("Professional_and_Occupational_Licensing.csv", "r");
+    fp = fopen("Professional_and_Occupational_Licensing.tsv.txt", "r");
     fgets(buffer, BUFFER_SIZE, fp);
 
     while (!feof(fp)) {
@@ -141,7 +197,7 @@ struct array *read_records() {
         fgets(buffer, BUFFER_SIZE, fp);
 
         start = 0;
-        for (end = start; buffer[end] != ','; end++);    /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++);    /* find next comma */
 
         (arrptr->arr)[line].last_name = malloc(end - start + 1);
         strncpy((arrptr->arr)[line].last_name, buffer + start, end - start);
@@ -149,7 +205,7 @@ struct array *read_records() {
         printf("Last name: %s\n", (arrptr->arr)[line].last_name);*/
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         (arrptr->arr)[line].first_name = malloc(end - start + 1);
         strncpy((arrptr->arr)[line].first_name, buffer + start, end - start);
@@ -157,13 +213,10 @@ struct array *read_records() {
         printf("First name: %s\n", (arrptr->arr)[line].first_name);*/
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
-
-        start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         (arrptr->arr)[line].license_no = malloc(end - start + 1);
         strncpy((arrptr->arr)[line].license_no, buffer + start, end - start);
@@ -171,10 +224,10 @@ struct array *read_records() {
         printf("License no: %s\n", (arrptr->arr)[line].license_no);*/
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         (arrptr->arr)[line].license_type = malloc(end - start + 1);
         strncpy((arrptr->arr)[line].license_type, buffer + start, end - start);
@@ -182,19 +235,19 @@ struct array *read_records() {
         printf("License type: %s\n", (arrptr->arr)[line].license_type);*/
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         start = end + 1;
-        for (end = start; buffer[end] != ','; end++); /* find next comma */
+        for (end = start; buffer[end] != '\t'; end++); /* find next comma */
 
         (arrptr->arr)[line].issue_date = malloc(end - start + 1);
         strncpy((arrptr->arr)[line].issue_date, buffer + start, end - start);
@@ -442,8 +495,8 @@ int main() {
     printf("Duplicates: %ld\n", duplicates_issue);
     printf("Collisions: %ld\n", collisions_issue);
 
-/*
-    r = find("Kremer", arrptr);
+
+    r = find("Baggett", arrptr);
     if (r == NULL) {
         printf("Not found\n");
     } else {
@@ -467,7 +520,7 @@ int main() {
                r->first_name,
                r->license_type);
     }
-*/
+
     free_array_ptr(arrptr);
     free_array_ptr(licensePtr);
     free_array_ptr(issuePtr);
