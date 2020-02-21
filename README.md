@@ -14,4 +14,4 @@
 - epark03@uoguelph.ca
 
 ### License / Warning
-- This is code written by me, used and submitted for an academic assignment at my current university. Use at your own risk
+- This is code written by me, used and submitted for an academic assignment provided by my undergraduate degree. Use at your own risk
